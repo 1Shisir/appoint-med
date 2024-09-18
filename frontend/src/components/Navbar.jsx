@@ -43,7 +43,7 @@ const Navbar = () => {
               </div>
             </div>
           </div>
-          :<button onClick={()=> useNavigate('/login')} className='bg-primary text-white px-8 py-3 rounded-full font-light hidden md:block'>Create account</button>
+          : <button onClick={()=> {useNavigate('/login'); scrollTo(0,0)}} className='bg-primary text-white px-8 py-3 rounded-full font-light hidden md:block'>Create account</button>
         }
         
       </div>
