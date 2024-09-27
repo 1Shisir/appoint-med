@@ -13,15 +13,10 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASS, {
   dialect: 'mysql', // Change to 'postgres', 'sqlite', etc. if using a different SQL DB
 });
 
+sequelize.authenticate().then(() => {
+  console.log('Database connected');
+}).catch((err) => {
+  console.log(err);
+});
 
-const connectDb =async () =>  {
-  try {
-     await sequelize.authenticate();
-    console.log('Connection has been established successfully.');
-  } catch (error) {
-    console.error('Unable to connect to the database:', error);
-  }
-}
-
-// Export the instance of Sequelize
-export default connectDb;
+export default sequelize;
