@@ -11,12 +11,8 @@ const app = express();
 const port = process.env.PORT || 4000;  // Default port is 4000  if not specified in .env file
 connectClodinary();
 
-const corsOption= {
-    origin: "true"
-}
-
 //middleware
-app.use(cors(corsOption));
+app.use(cors());
 app.use(express.json()); //parse json
 app.use('/api/auth', authRoutes); //domain/api/auth/register or login
 app.use('/api/admin',adminRouter);
