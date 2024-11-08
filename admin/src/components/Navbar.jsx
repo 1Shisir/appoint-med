@@ -1,6 +1,7 @@
-import React, { useContext , useNavigate} from 'react'
+import React, { useContext} from 'react'
 import { assets } from '../assets/assets'
 import { AdminContext } from '../context/AdminContext'
+import { useNavigate } from 'react-router-dom'
 
 const Navbar = () => {
 

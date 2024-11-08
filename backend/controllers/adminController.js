@@ -92,4 +92,17 @@ const adminLogin = async (req, res) => {
     }
 };
 
-export {addDoctors, adminLogin};
+//api to get all doctors for admin panel
+
+const allDoctors = async (req, res) => {
+    try {
+        const doctors = await Doctor.findAll({});
+        res.json({success: "true", doctors});
+        
+    } catch (error) {
+        console.log(error);
+        res.json({success: "false",message: error.message});
+    }
+}
+
+export {addDoctors, adminLogin, allDoctors};
