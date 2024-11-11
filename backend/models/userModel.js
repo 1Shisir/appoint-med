@@ -44,12 +44,11 @@
             type:DataTypes.STRING,
             defaultValue:"Not Specified"
         },
-        address:{
-            type: DataTypes.JSON,
-            defaultValue: {
-                line1: " ",
-                line2: " ",
-            }
+        address1:{
+            type: DataTypes.STRING,
+        },
+        address2:{
+            type: DataTypes.STRING,
         }
     });
 
