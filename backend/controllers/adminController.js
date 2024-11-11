@@ -96,7 +96,7 @@ const adminLogin = async (req, res) => {
 
 const allDoctors = async (req, res) => {
     try {
-        const doctors = await Doctor.findAll({});
+        const doctors = await Doctor.findAll({attributes: {exclude: ['password']}});
         res.json({success: "true", doctors});
         
     } catch (error) {

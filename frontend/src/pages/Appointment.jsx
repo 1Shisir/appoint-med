@@ -16,7 +16,8 @@ const Appointment = () => {
   const [slotTime, setSlotTime] = useState('')
 
   const fetchDocInfo = async () => {
-   const docInfo = doctors.find(doc => doc._id === docId)
+   console.log(doctors)
+   const docInfo = doctors.find(doc => doc._id == docId)
    setDocInfo(docInfo)
   }
 
@@ -67,11 +68,16 @@ const Appointment = () => {
 }
 
   useEffect(() => {
-    fetchDocInfo()
+    if (doctors && doctors.length > 0) {
+      fetchDocInfo();
+    }
   }, [doctors, docId])
 
   useEffect(() => {
     getAvailableSlots()
+  },[docInfo])
+
+  useEffect(() => {
   }, [docSlots])
 
   return docInfo &&(

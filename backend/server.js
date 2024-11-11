@@ -5,6 +5,7 @@ import authRoutes from './routes/auth.route.js';
 import sequelize from './config/database.js';
 import connectClodinary from './config/cloudinary.js';
 import adminRouter from './routes/adminRoute.js';
+import doctorRouter from './routes/doctorRoute.js';
 
 //app config
 const app = express();
@@ -14,8 +15,11 @@ connectClodinary();
 //middleware
 app.use(cors());
 app.use(express.json()); //parse json
+
+//api endpoints
 app.use('/api/auth', authRoutes); //domain/api/auth/register or login
 app.use('/api/admin',adminRouter);
+app.use('/api/doctor',doctorRouter);
 
 //listen
 sequelize.sync()
