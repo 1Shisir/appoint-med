@@ -1,15 +1,58 @@
 import React, { useContext, useState } from 'react'
 import { AppContext } from '../context/AppContext'
+import {assets} from '../assets/assets'
+import { toast } from 'react-toastify'
+import axios from 'axios'
 
 const MyProfile = () => {
 
-  const {userData, setUserData} = useContext(AppContext)
+  const {userData, setUserData, token, backendUrl,loadUserProfileData} = useContext(AppContext)
 
   const [willEdit, setWillEdit] = useState(0)
+  const [image,setImage] = useState(false)
+
+  const updateUserProfileData = async () => {
+    try {
+      const formData = new FormData()
+
+      formData.append('name',userData.name)
+      formData.append('phone',userData.phone)
+      formData.append('dob',userData.dob)
+      formData.append('address1',userData.address1)
+      formData.append('address2',userData.address2)
+      formData.append('gender',userData.gender)
+
+      image && formData.append('image',image)
+
+      const {data} = await axios.post(backendUrl + '/api/user/update-profile',formData,{headers:{token}})
+      if (data.success) {
+        toast.success(data.message) 
+        await loadUserProfileData()
+        setImage(false)
+        setWillEdit(false)
+      } else{
+        toast.error(data.message)
+      }
+
+    } catch (error) {
+      console.log(error)
+      toast.error(error.message)
+    }
+  }
 
   return userData && (
     <div className='max-w-lg flex flex-col gap-2 text-sm'>
-      <img className='w-36 rounded' src={userData.image} alt="" />
+      {
+        willEdit ?
+        <label htmlFor="image">
+          <div className='inline-block relative cursor-pointer'>
+            <img className='w-36 rounded opacity-80' src={image ? URL.createObjectURL(image) : userData.image} alt="" />
+            <img className='w-10 absolute bottom-12 right-12' src={image ? '' : assets.upload_icon } alt="" />
+            <input onChange={(e) => setImage(e.target.files[0])} type="file" id="image" hidden/>
+          </div>
+
+        </label> : <img className='w-36 rounded' src={userData.image} alt="" />
+      }
       {
         willEdit
         ? <input className='bg-gray-50 text-3xl font-medium max-w-60 mt-4' type="text" value={userData.name} onChange={e => setUserData(prev => ({...prev,name:e.target.value}))} />
@@ -32,9 +75,9 @@ const MyProfile = () => {
           {
             willEdit 
             ?<p>
-              <input className='bg-gray-50' type="text" value={userData.address1} onChange={(e) => setUserData(prev => ({...prev,address : {...prev.address,line1:e.target.value}}))}/>
+              <input className='bg-gray-50' type="text" value={userData.address1} onChange={(e) => setUserData(prev => ({...prev,address1 :e.target.value}))}/>
               <br />
-              <input className='bg-gray-50' type="text" value={userData.address2} onChange={(e) => setUserData(prev => ({...prev,address : {...prev.address,line2:e.target.value}}))}/>
+              <input className='bg-gray-50' type="text" value={userData.address2} onChange={(e) => setUserData(prev => ({...prev,address2 :e.target.value}))}/>
             </p>
             : <p className='text-gray-500'>
               {userData.address1}
@@ -69,7 +112,7 @@ const MyProfile = () => {
       <div className='mt-10'>
         {
           willEdit 
-          ? <button className='border border-primary px-8 py-2 rounded-full hover:bg-primary hover:text-white transition-all' onClick={() => setWillEdit(false)}>Save information</button>
+          ? <button className='border border-primary px-8 py-2 rounded-full hover:bg-primary hover:text-white transition-all' onClick={updateUserProfileData}>Save information</button>
           : <button className='border border-primary px-8 py-2 rounded-full hover:bg-primary hover:text-white transition-all' onClick={() => setWillEdit(true)}>Edit</button>
         }
       </div>

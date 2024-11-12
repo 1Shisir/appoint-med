@@ -3,6 +3,8 @@ import bcrypt from 'bcryptjs';
 import User from '../models/userModel.js';
 import jwt from 'jsonwebtoken';
 import {v2 as cloudinary} from 'cloudinary';
+import Appointment from '../models/appointmentModel.js';
+import Doctor from '../models/doctorModel.js';
 
 //API to register user
 
@@ -131,4 +133,103 @@ const updateUserProfile = async(req,res) => {
     }
 }
 
-export { registerUser,loginUser,getUserProfile,updateUserProfile };
+//API to book appointment
+const bookAppointment = async (req, res) => {
+    try {
+        const { userId, docId, slotDate, slotTime } = req.body;
+
+        // Fetch doctor data and exclude password
+        const docData = await Doctor.findByPk(docId, {
+            attributes: { exclude: ['password'] }
+        });
+
+        if (!docData) {
+            return res.status(404).json({ success: false, message: 'Doctor not found' });
+        }
+
+        // Check if doctor is available
+        if (!docData.available) {
+            return res.json({ success: false, message: 'Doctor is not available' });
+        }
+     
+        
+        let slots_booked = {};
+
+        if (docData.slots_booked) {
+            // Only parse if slots_booked is not empty
+            slots_booked = JSON.parse(docData.slots_booked);
+        }
+
+        // Checking for slot availability
+        if (slots_booked[slotDate]) {
+            if (slots_booked[slotDate].includes(slotTime)) {
+                return res.json({ success: false, message: 'Slot not available' });
+            } else {
+                slots_booked[slotDate].push(slotTime);
+            }
+        } else {
+            slots_booked[slotDate] = [slotTime];
+        }
+
+        // Get user data and exclude password
+        const userData = await User.findByPk(userId, {
+            attributes: { exclude: ['password'] }
+        });
+
+        if (!userData) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        // Prepare appointment data, excluding slots_booked
+        const docInfo = docData.toJSON();
+        console.log(docInfo);
+        delete docInfo.slots_booked;
+
+        const appointmentData = {
+            userId,
+            docId,
+            slotDate,
+            slotTime,
+            userData: userData.toJSON(),
+            docData: docInfo,
+            amount: docData.fees,
+            date: new Date().toISOString(),
+        };
+
+        // Save new appointment
+        const newAppointment = await Appointment.create(appointmentData);
+        
+
+        // Update doctor's booked slots
+        await Doctor.update(
+            { slots_booked: JSON.stringify(slots_booked) },
+            { where: { _id: docId } }
+        );
+
+        res.json({ success: true, message: "Appointment booked successfully", data: newAppointment });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+
+//API to get user appointments for frontend my appointments page
+
+const listAppointment = async (req, res) => {
+    try {
+        const { userId } = req.body;
+
+        const appointments = await Appointment.findAll({ where: { userId } });
+
+        res.json({ success: true, appointments });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+
+export { registerUser,loginUser,getUserProfile,updateUserProfile, bookAppointment,listAppointment };
