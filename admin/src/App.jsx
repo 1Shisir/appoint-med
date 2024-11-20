@@ -27,8 +27,8 @@ const App = () => {
       <div className='flex items-start'>
         <Sidebar/>
         <Routes>
+            <Route path='/' element={aToken ? <Dashboard/> : <DoctorDashboard/>} />
           {/* admin routes */}
-          <Route path='/' element={<Dashboard/>} />
           <Route path='/admin-dashboard' element={< Dashboard/>} />
           <Route path='/all-appointments' element={<AllAppointments />} />
           <Route path='/add-doctor' element={<AddDoctor/>} />

@@ -1,11 +1,38 @@
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { DoctorContext } from '../../context/DoctorContext'
 import { AppContext } from '../../context/AppContext'
+import axios from 'axios'
+import { toast } from 'react-toastify'
 
 const DoctorProfile = () => {
 
-  const {dToken, profiledata, setProfileData, getProfileData} = useContext(DoctorContext)
-  const {backendUrl,currency, slotDateFormat} = useContext(AppContext)
+  const {dToken, profiledata, setProfileData, getProfileData, backendUrl} = useContext(DoctorContext)
+  const {currency} = useContext(AppContext)
+  const [isEdit, setIsEdit] = useState(false)
+
+  const updateProfile = async () => {
+    try {
+      const updateData = {
+        fees: profiledata.fees,
+        address: profiledata.address,
+        available: profiledata.available
+      }
+
+      const {data} = await axios.post(backendUrl+'/api/doctor/update-profile', updateData, {headers:{dToken}})
+
+      if(data.success){
+        toast.success(data.message)
+        setIsEdit(false)
+        getProfileData()
+      } else {
+        toast.error(data.message)
+      }
+      
+    } catch (error) {
+      console.log(error)
+      toast.error(error.message)
+    }
+  }
 
 
   useEffect(() => {
@@ -25,32 +52,36 @@ const DoctorProfile = () => {
 
         <div className='flex-1 border border-stone-100 rounded-lg p-8 py-7 bg-white'>
           {/* doci info  name degree experience*/}
-          <p>{profiledata.name}</p>
-          <div>
+          <p className='flex items-center gap-2 text-3xl font-medium text-gray-700'>{profiledata.name}</p>
+          <div className='flex items-center gap-2 mt-1 text-gray-600'>
             <p>{profiledata.degree} - {profiledata.speciality}</p>
-            <button>{profiledata.experience}</button>
+            <button className='py-0.5 px-2 border text-xs rounded-full'>{profiledata.experience}</button>
           </div>
 
           {/* doctor about */}
           <div>
-            <p>About</p>
-            <p>{profiledata.about}</p>
+            <p className='flex items-center gap-1 text-sm font-medium text-neutral-800 mt-3'>About</p>
+            <p className='text-sm text-gray-600 max-w-[700px] mt-1'>{profiledata.about}</p>
           </div>
 
-          <p>Appointment fee: <span>{currency}{profiledata.fees}</span> </p>
+          <p className='text-gary-600 font-medium mt-4'>Appointment fee: <span className='text-gray-800'>{currency}{isEdit ? <input onChange={(e) => setProfileData(prev => ({...prev, fees:e.target.value}))} value={profiledata.fees} type="text" name="" id="" /> :  profiledata.fees}</span> </p>
 
-          <div>
-            <p>Address</p>
-            <p>{profiledata.address}</p>
+          <div className='flex gap-2 py-2'>
+            <p>Address:</p>
+            <p className='text-sm'>{isEdit ? <input type="text" onChange={(e) => setProfileData(prev => ({...prev,address:e.target.value}))} value={profiledata.address} /> :  profiledata.address}</p>
           </div>
 
-          <div>
-            <input type="checkbox" name="" id="" />
+          <div className='flex gap-1 pt-2'>
+            <input onChange={() => isEdit && setProfileData(prev => ({...prev,available : !prev.available}))} checked={profiledata.available} type="checkbox" name="" id="" />
             <label htmlFor="">Available</label>
           </div>
-
-          <button>Edit</button>
-
+          {
+            isEdit
+            ?<button onClick={updateProfile} className='px-4 py-1 border border-primary text-sm rounded-full mt-5 hover:bg-primary hover:text-white transition-all'>Save information</button>
+            :<button onClick={() => setIsEdit(true)} className='px-4 py-1 border border-primary text-sm rounded-full mt-5 hover:bg-primary hover:text-white transition-all'>Edit</button>
+          }
+          
+          
         </div>
 
       </div>
