@@ -1,6 +1,7 @@
 import Doctor from '../models/doctorModel.js'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
+import Appointment from '../models/appointmentModel.js'
 
 const changeAvailability = async (req, res) => {
     try {
@@ -69,6 +70,77 @@ const doctorLogin = async (req, res) => {
     }
 }
 
+//API to get doctor appointments
+const appointmentsDoctor = async (req, res) => {
+    try {
+        const { docId } = req.body;
+
+        const appointments = await Appointment.findAll({
+            where: { docId },
+        });
+
+        res.json({ success: true, appointments });
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+//API to mark appointment as completed
+const appointmentComplete = async (req, res) => {
+    try {
+        const { docId, appointmentId } = req.body;
+
+        // Fetch appointment data
+        const appointmentData = await Appointment.findByPk(appointmentId);
+
+        console.log(typeof docId, typeof appointmentData.docId)
+
+        // Check if appointment exists and matches the doctor
+        if (!appointmentData) {
+            res.json({ success: false, message: 'Appointment not found' });
+        } else if (Number(appointmentData.docId) !== Number(docId)) {
+            res.json({ success: false, message: 'Mark failed' });
+        }
+        else{
+            await Appointment.update(
+                { isCompleted: true },
+                { where: { _id: appointmentId } }
+            );
+            res.json({ success: true, message: 'Appointment marked as completed' });
+        }
+    } catch (error) {
+        console.error('Error in appointmentComplete:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
 
 
-export {changeAvailability, doctorList, doctorLogin}
+//API to cnacel appointment
+const appointmentCancel = async (req, res) => {
+    try {
+        const { docId, appointmentId } = req.body;
+
+        const appointmentData = await Appointment.findByPk(appointmentId)
+
+        if(!appointmentData) {
+            return res.status(404).json({ success: false, message: 'Appointment not found' });   
+        } else  if (Number(appointmentData.docId) !== Number(docId)) {
+            res.json({ success: false, message: 'Cancellation failed' });
+        }
+        else{
+            await Appointment.update(
+                { cancelled: true },
+                { where: { _id: appointmentId } }
+            );
+            res.json({ success: true, message: 'Appointment cancelled successfully' });
+        }
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message });
+    }
+}
+
+
+
+export {changeAvailability, doctorList, doctorLogin, appointmentsDoctor,appointmentComplete, appointmentCancel}
