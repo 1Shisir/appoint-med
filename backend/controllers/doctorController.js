@@ -141,6 +141,81 @@ const appointmentCancel = async (req, res) => {
     }
 }
 
+//API to get data for dashboard
+const doctorDashboard = async (req, res) => {
+    try {
+        const { docId } = req.body;
+
+        const appointments = await Appointment.findAll({
+            where: { docId },
+        });
+
+        let earnings = 0;
+        appointments.map((item) => {
+            if(item.isCompleted || item.payment){
+                earnings += item.amount;
+            }
+        })
+
+        let patients = [];
+        appointments.map((item) => {
+            if(!patients.includes(item.userId)){
+                patients.push(item.userId);
+            }
+        })
+
+        const dashData = {
+            earnings,
+            appointments: appointments.length,
+            patients: patients.length,
+            latestAppointments: appointments.reverse().slice(0, 5)
+        }
+
+        res.json({ success: true, dashData }); 
+
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message });
+    }
+}
+
+//API to get doctor profile for doctor panel
+
+const doctorProfile = async (req, res) => {
+    try {
+        const { docId } = req.body;
+
+        const doctor = await Doctor.findByPk(docId, {
+            attributes: { exclude: ['password'] }
+        });
+
+        res.json({ success: true, doctor });
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message });
+    }
+}
+
+//API to update doctor profile data from doctor panel
+const updateDoctorProfile = async (req, res) => {
+    try {
+        const { docId, fees, address ,available } = req.body;
+
+        await Doctor.update(
+            { fees, address, available },
+            { where: { _id: docId } }
+        );
+
+        res.json({ success: true, message: 'Profile updated successfully' });
+        
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error});
+        
+    }
+
+}
 
 
-export {changeAvailability, doctorList, doctorLogin, appointmentsDoctor,appointmentComplete, appointmentCancel}
+
+export {changeAvailability, doctorList, doctorLogin, appointmentsDoctor,appointmentComplete, appointmentCancel, doctorDashboard, doctorProfile, updateDoctorProfile}
