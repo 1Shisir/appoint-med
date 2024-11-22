@@ -104,19 +104,6 @@
 
 ---
 
-## Screenshots
-
-### Patient Dashboard
-*View and manage appointments.*
-
-### Doctor Dashboard
-*Monitor schedules and update availability.*
-
-### Admin Dashboard
-*Manage users, doctors, and reports.*
-
----
-
 ## Contributing
 
 Contributions are welcome! Please follow these steps:
@@ -137,17 +124,11 @@ Contributions are welcome! Please follow these steps:
 
 ---
 
-## License
-
-This project is licensed under the [MIT License](LICENSE).
-
----
-
 ## Contact
 
 For questions or feedback, please contact:
 
-- **Your Name**: [Your Email](mailto:your-email@example.com)  
-- **GitHub**: [@your-username](https://github.com/your-username)
+- shisirghimire21@gmail.com 
+- https://github.com/1Shisir
 
 ---
