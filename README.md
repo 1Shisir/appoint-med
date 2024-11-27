@@ -47,7 +47,7 @@
 ### Backend Setup:
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/appointmed.git
+   git clone https://github.com/1Shisir/appointmed.git
    cd appointmed/backend
    ```
 2. Install dependencies:
